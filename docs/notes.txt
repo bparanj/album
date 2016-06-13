@@ -1,3 +1,4 @@
+File Upload using Refile Gem in Rails 5
 
 ## Install Prerequisite Image Processing Library
 
@@ -15,6 +16,18 @@ Copyright: Copyright (C) 1999-2015 ImageMagick Studio LLC
 License: http://www.imagemagick.org/script/license.php
 Features: Cipher DPC Modules 
 Delegates (built-in): bzlib freetype jng jpeg ltdl lzma png tiff xml zlib
+```
+
+If it is not already installed, you can install it on OS X:
+
+```
+brew install imagemagick
+```
+
+On Ubuntu:
+
+```
+sudo apt-get install imagemagick
 ```
 
 ## Create a Rails 5 Photo Album App
@@ -78,7 +91,7 @@ Bundler could not find compatible versions for gem "rack":
         rack (< 3, > 1)
 ```
 
-You can specify git source with a ref, branch or tag like this:
+You can specify git source with a ref, branch or tag in Gemfile like this:
 
 ```ruby
 gem 'rails', :git => "git://github.com/rails/rails.git", :ref => "4aded"
@@ -201,7 +214,9 @@ You can use the fill and dimensions to display the image in a different size.
 
 This will resize the image to a small thumb. You can increase the size from 100 to 300.
 
+```rhtml
 <%= image_tag attachment_url(@photo, :image, :fill, 300, 300, format: 'jpg') %>
+```
 
 This chops the top and bottom. Change fill to fit to solve that problem. 
 
@@ -229,7 +244,7 @@ def photo_params
 end
 ```
 
-You will be able to delete the image. When the image is displayed, this results in an error:
+You will now be able to delete the image. When the image is displayed, this results in an error:
 
 ```
 nil is not a valid asset source in photos#show
