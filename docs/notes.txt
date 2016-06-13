@@ -1,0 +1,271 @@
+
+## Install Prerequisite Image Processing Library
+
+Check if ImageMagick is already installed by running the convert command.
+
+```
+convert -version
+```
+
+If it is already installed, you will see the ImageMagick version number:
+
+```
+Version: ImageMagick 6.9.2-4 Q16 x86_64 2015-10-11 http://www.imagemagick.org
+Copyright: Copyright (C) 1999-2015 ImageMagick Studio LLC
+License: http://www.imagemagick.org/script/license.php
+Features: Cipher DPC Modules 
+Delegates (built-in): bzlib freetype jng jpeg ltdl lzma png tiff xml zlib
+```
+
+## Create a Rails 5 Photo Album App
+
+Create a Rails 5 project.
+
+```
+rails new album
+```
+
+Create a photo scaffold.
+
+```
+rails g scaffold photo name
+```
+
+Migrate the database.
+
+```
+rails db:migrate
+```
+
+## Install Refile Gems
+
+Add the gems to Gemfile.
+
+```ruby
+gem "refile", require: "refile/rails"
+gem "refile-mini_magick"
+```
+
+Run:
+
+```
+bundle
+```
+
+This results in the following error:
+
+```
+Bundler could not find compatible versions for gem "rack":
+  In Gemfile:
+    rails (< 5.1, >= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+      actioncable (= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+        actionpack (= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+          rack (~> 2.x)
+
+    rails (< 5.1, >= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+      actioncable (= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+        actionpack (= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+          rack-test (~> 0.6.3) was resolved to 0.6.3, which depends on
+            rack (>= 1.0)
+
+    refile-mini_magick was resolved to 0.1.0, which depends on
+      refile (~> 0.5) was resolved to 0.5.0, which depends on
+        sinatra (~> 1.4.5) was resolved to 1.4.5, which depends on
+          rack (~> 1.4)
+
+    sass-rails (~> 5.0) was resolved to 5.0.4, which depends on
+      sprockets (< 4.0, >= 2.8) was resolved to 3.6.0, which depends on
+        rack (< 3, > 1)
+```
+
+You can specify git source with a ref, branch or tag like this:
+
+```ruby
+gem 'rails', :git => "git://github.com/rails/rails.git", :ref => "4aded"
+gem 'rails', :git => "git://github.com/rails/rails.git", :branch => "2-3-stable"
+gem 'rails', :git => "git://github.com/rails/rails.git", :tag => "v2.3.5"
+```
+
+For our gem, we can use the tag 0.6.2 like this:
+
+```ruby
+gem 'refile', :git => "git://github.com/rails/rails.git", :tag => "0.6.2", require: "refile/rails"
+gem "refile-mini_magick"
+```
+
+Run:
+
+```
+bundle
+```
+
+```
+fatal: Needed a single revision
+```
+
+You must specify the tag as seen in the github repo, change the tag:
+
+```
+:tag => "v0.6.2"
+```
+
+You will now get the error:
+
+```
+Bundler could not find compatible versions for gem "rack":
+  In Gemfile:
+    rails (< 5.1, >= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+      railties (= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+        actionpack (= 5.0.0.rc1) was resolved to 5.0.0.rc1, which depends on
+          rack (~> 2.x)
+
+    refile was resolved to 0.6.2, which depends on
+      sinatra (~> 1.4.5) was resolved to 1.4.5, which depends on
+        rack (~> 1.4)
+
+[Can't install on Rails 5 ](https://github.com/refile/refile/issues/447 'Can't install on Rails 5')
+```
+
+Change the refile gem section in Gemfile to this:
+
+```ruby
+gem 'sinatra', github: 'sinatra' #require master to get the rack >= 2.0
+# remove version on gem dependency to use sinatra master branch
+gem 'refile', require: 'refile/rails', github: 'pgericson/refile', branch: 'stupid-hack-sinatra-version' 
+gem 'refile-mini_magick'
+```
+
+Run:
+
+```
+bundle
+```
+
+The installation will now complete successfully.
+
+## Integrate Refile Gem into Rails 5 App
+
+Add the attachment declaration in the photo model.
+
+```ruby
+class Photo < ApplicationRecord
+  attachment :image
+end
+```
+
+Generate the migration to add `image_id` column to photos table.
+
+```
+rails g migration add_image_to_photos image_id
+```
+
+Migrate the database.
+
+```
+rails db:migrate
+```
+
+In the form partial, add the file upload field:
+
+```rhtml
+<div class='field'>
+	<%= f.attachment_field :image %>
+</div>
+```
+
+Allow the image field to be accessed from the form.
+
+```ruby
+def photo_params
+  params.require(:photo).permit(:name, :image)
+end
+```
+
+In show.html.erb, display the uploaded image:
+
+```rhtml
+<%= image_tag attachment_url (@photo, :image) %>
+```
+
+Having a space between the arguments and the attachment_url method will create a syntax error in Ruby. Remove the space.
+
+```rhtml
+<%= image_tag attachment_url(@photo, :image) %>
+```
+
+You can use the fill and dimensions to display the image in a different size.
+
+```rhtml
+<%= image_tag attachment_url(@photo, :image, :fill, 100, 100, format: 'jpg') %>
+```
+
+This will resize the image to a small thumb. You can increase the size from 100 to 300.
+
+<%= image_tag attachment_url(@photo, :image, :fill, 300, 300, format: 'jpg') %>
+
+This chops the top and bottom. Change fill to fit to solve that problem. 
+
+```rhtml
+<%= image_tag attachment_url(@photo, :image, :fit, 300, 300, format: 'jpg') %>
+```
+
+## Removing Attachments
+
+Add remove check box to form partial:
+
+```ruby
+<% if @photo.image_id? %>
+  <%= image_tag attachment_url(@photo, :image, :fit, 500, 500) %>
+  <%= f.check_box :remove_image %>
+  <%= f.label :remove_image %>
+<% end %>
+```
+
+Allow the `remove_image` field to be submitted to the server.
+
+```ruby
+def photo_params
+  params.require(:photo).permit(:name, :image, :remove_image)
+end
+```
+
+You will be able to delete the image. When the image is displayed, this results in an error:
+
+```
+nil is not a valid asset source in photos#show
+```
+
+Add a conditional to hide the image display if there is no image.
+
+```rhtml
+<% if @photo.image_id? %>
+  <%= image_tag attachment_url(@photo, :image, :fit, 500, 500, format: 'jpg') %>
+<% end %>
+```
+
+Reload photos show page, it will load without crashing. It will have only the name. 
+
+## Image Type Validation
+
+To validate the file uploaded is an image you can use the type option.
+
+```ruby
+class Photo < ApplicationRecord
+  attachment :image, type: :image
+end
+```
+
+This will restrict the uploaded file to JPEG, PNG and GIF formats. For more validations, checkout the [refile](https://github.com/refile/refile 'Refile Gem') home page. 
+
+## Cleanup
+
+Delete the scaffold.css and add your own layout to layout.css. Checkout the source code for this article at [album]( 'Album').
+
+## Summary
+
+In this article, you learned how to implement file upload using refile gem in Rails 5 apps.
+
+## References
+
+[How to resize Image?](https://github.com/refile/refile/issues/313 'How to resize Image')
+[Rails 5 support](https://github.com/refile/refile/issues/416 'Rails 5 support')
