@@ -18,8 +18,6 @@ gem 'coffee-rails', '~> 4.1.0'
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
-# Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
-gem 'turbolinks', '~> 5.x'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.0'
 
@@ -27,7 +25,7 @@ gem 'sinatra', github: 'sinatra' #require master to get the rack >= 2.0
 # remove version on gem dependency to use sinatra master branch
 gem 'refile', require: 'refile/rails', github: 'pgericson/refile', branch: 'stupid-hack-sinatra-version'
 gem 'refile-mini_magick'
-
+gem 'turbolinks', '~> 5.x'
 
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
