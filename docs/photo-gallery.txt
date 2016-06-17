@@ -1,53 +1,67 @@
 Photo Gallery using Lightbox 2 in Rails 5
 
-Download [lightbox 2](http://lokeshdhakar.com/projects/lightbox2/ 'lightbox2'). 
-Extract the zip file. 
-Copy the lightbox.min.css to app/vendor/assets/stylesheets directory.
-Copy the lightbox.min.js to app/vendor/assets/javascripts directory.
+In this article, you will learn how to implement a photo gallery using Lightbox 2 in Rails 5. We will continue working on the album project that we discussed in the article [File Upload using Refile Gem in Rails 5](https://rubyplus.com/articles/4141-File-Upload-using-Refile-Gem-in-Rails-5 'File Upload using Refile Gem in Rails 5').
+
+## Initial Setup
+
+- Download [lightbox 2](http://lokeshdhakar.com/projects/lightbox2/ 'lightbox2'). 
+- Extract the zip file. 
+- Copy the lightbox.css to app/vendor/assets/stylesheets directory.
+- Copy the lightbox.js to app/vendor/assets/javascripts directory.
+- Copy the images close.png, loading.gif, next.png and prev.png to app/assets/images folder.
+
+## Integrate Lightbox 2 with Rails 5
+
+**Hook Lightbox 2 Javascript to Asset Pipeline**
 
 Add
+
+```
 //= require lightbox
+```
 
-to application.js
+to app/assets/javascripts/application.js. It will now look like this:
 
-Add
-
-*= require lightbox
-
-in application.css
-
-Copy the close.png, loading.gif, next.png and prev.png to app/assets/images folder.
-
-
-app/assets/javascripts/application.js
-
+```
 //= require jquery
 //= require jquery_ujs
 //= require turbolinks	
 //= require lightbox
 //= require_tree .
+```
 
-app/assets/stylesheets/application.scss
+**Hook Lightbox 2 Stylesheet to Asset Pipeline**
 
+Add
+
+```
+@import 'lightbox';
+```
+
+to app/assets/stylesheets/application.scss. It will now look like this:
+
+```
  *= require_tree .
  *= require_self
  */
 
 @import 'lightbox';
+```
 
+**Note**: The file extension must be .scss not css. 
 
+**Move the Javascript Include Tag in Layout File**
 
-app/views/layouts/application.html.erb
+The app/views/layouts/application.html.erb must have the `javascript_include_tag` just before body tag ends, otherwise the photo gallery will not work. The layout file looks like this:
 
+```rhtml
 <!DOCTYPE html>
 <html>
   <head>
     <title>Album</title>
     <%= csrf_meta_tags %>
-
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
   </head>
-
   <body>
     <div id="container">
       <% flash.each do |name, msg| %>
@@ -60,30 +74,14 @@ app/views/layouts/application.html.erb
 	
   </body>
 </html>
+```
 
-Javascript must be just before the body tag ends, otherwise the photo gallery will not work.
+Rename the lightbox.css to lightbox.scss.erb. The css files needs to use asset pipeline helper `image_path`, to hook the images to asset pipeline. It will now look like this:
 
-app/views/photos/index.html.erb
-
-<h3>A Four Image Set</h3>
-  <div>
-      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-3.jpg" data-lightbox="example-set" data-title="Click the right half of the image to move forward."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-3.jpg" alt=""/></a>
-      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-4.jpg" data-lightbox="example-set" data-title="Or press the right arrow on your keyboard."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-4.jpg" alt="" /></a>
-      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-5.jpg" data-lightbox="example-set" data-title="The next image in the set is preloaded as you're viewing."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-5.jpg" alt="" /></a>
-      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-6.jpg" data-lightbox="example-set" data-title="Click anywhere outside the image or the X to the right to close."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-6.jpg" alt="" /></a>
-  </div>
-</section>
-
-Copy the images for close, loading, next and prev to vendor/assets/images folder.
-Copy lightbox.js to vendor/assets/javascripts folder
-Copy lightbox.css to vendor/assets/stylesheets folder. The css files needs to use asset pipeline helper image_path, to hook the images to asset pipeline. It will look like this:
-
-Rename the lightbox.css to lightbox.scss.erb. Use `image_path` asset tag helper for the images. The file will look like this:
-
+```css
 /* Preload images */
 body:after {
   content: url(<%= image_path('close.png')%>) url(<%= image_path('loading.gif')%>) url(<%= image_path('prev.png')%>) url(<%= image_path('next.png')%>);
- 	    
   display: none;
 }
 
@@ -288,20 +286,38 @@ body.lb-disable-scrolling {
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
   opacity: 1;
 }
+```
 
+## Test the Configuration
 
-Browse to http://localhost:3000/photos to view the lightbox photo gallery in action. We can now remove the hard coded images to the uploaded images like this:
+Let's use the example code that ships with Lightbox 2 to verify our setup is working. Add the following code in app/views/photos/index.html.erb.
 
+```html
+<h3>A Four Image Set</h3>
+  <div>
+      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-3.jpg" data-lightbox="example-set" data-title="Click the right half of the image to move forward."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-3.jpg" alt=""/></a>
+      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-4.jpg" data-lightbox="example-set" data-title="Or press the right arrow on your keyboard."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-4.jpg" alt="" /></a>
+      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-5.jpg" data-lightbox="example-set" data-title="The next image in the set is preloaded as you're viewing."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-5.jpg" alt="" /></a>
+      <a class="example-image-link" href="http://lokeshdhakar.com/projects/lightbox2/images/image-6.jpg" data-lightbox="example-set" data-title="Click anywhere outside the image or the X to the right to close."><img class="example-image" src="http://lokeshdhakar.com/projects/lightbox2/images/thumb-6.jpg" alt="" /></a>
+  </div>
+</section>
+```
+
+Browse to `http://localhost:3000/photos` to view the lightbox photo gallery in action. 
+
+## Photo Gallery of Album
+
+We can now remove the hard coded images and use the uploaded images for the gallery like this:
+
+```rhtml
 <div>
   <% @photos.each do |photo| %>	  	  
     <%= link_to(image_tag(attachment_url(photo, :image, :fit, 100, 100, format: 'jpg')), attachment_url(photo, :image, :fit, 500, 500, format: 'jpg'), data: { lightbox: "example-set", title: photo.name }) %>		
   <% end %>
 </div>	  
+```
 
-This will display the uploaded images in a gallery.
-
-
-
+You will now be able to view the uploaded images of the album in a photo gallery.
 
 
 
@@ -322,6 +338,12 @@ This will display the uploaded images in a gallery.
 
 
 
+
+
+Copy lightbox.css to vendor/assets/stylesheets folder.
+
+Copy the images for close, loading, next and prev to vendor/assets/images folder.
+Copy lightbox.js to vendor/assets/javascripts folder
 
 Ran into these issues:
 
