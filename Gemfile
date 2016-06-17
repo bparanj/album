@@ -27,6 +27,7 @@ gem 'refile', require: 'refile/rails', github: 'pgericson/refile', branch: 'stup
 gem 'refile-mini_magick'
 gem 'turbolinks', '~> 5.x'
 
+
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Use ActiveModel has_secure_password
