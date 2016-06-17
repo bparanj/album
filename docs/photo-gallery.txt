@@ -292,10 +292,13 @@ body.lb-disable-scrolling {
 
 Browse to http://localhost:3000/photos to view the lightbox photo gallery in action. We can now remove the hard coded images to the uploaded images like this:
 
+<div>
+  <% @photos.each do |photo| %>	  	  
+    <%= link_to(image_tag(attachment_url(photo, :image, :fit, 100, 100, format: 'jpg')), attachment_url(photo, :image, :fit, 500, 500, format: 'jpg'), data: { lightbox: "example-set", title: photo.name }) %>		
+  <% end %>
+</div>	  
 
-
-
-
+This will display the uploaded images in a gallery.
 
 
 
